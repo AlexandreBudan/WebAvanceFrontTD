@@ -15,6 +15,11 @@
             <h1>Vanilla JS Example</h1>
             <hr />
             <button id="fetch-users">Fetch Users</button>
+            <select hidden id="gender-filter">
+                <option value="">All</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
         </div>
         <table id="tbl-users">
             <thead>
@@ -40,6 +45,8 @@
         // Search user by name
         // Add users instead of replacing them.
 
+        const tbody = document.querySelector("#tbl-users tbody");
+
         const fetchUsers = async () => {
             try {
                 const response = await fetch("https://randomuser.me/api/?results=20");
@@ -57,10 +64,7 @@
             }
         }
 
-        document.getElementById("fetch-users").addEventListener("click", async () => {
-            const users = await fetchUsers();
-
-            const tbody = document.querySelector("#tbl-users tbody");
+        const buildUserRow = (users) => {
             tbody.innerHTML = users.map((user) =>  {
                 return `<tr>
                             <td><img src="${user.picture.thumbnail}" alt="User Photo"></td>
@@ -71,6 +75,24 @@
                             <td>${user.gender === 'male' ? '👨' : '👩'}</td>
                         </tr>`;
             }).join('');
+        }
+
+        document.getElementById("fetch-users").addEventListener("click", async () => {
+            const users = await fetchUsers();
+            buildUserRow(users);
+
+            document.getElementById("gender-filter").hidden = false;
+        });
+
+        document.getElementById("gender-filter").addEventListener("change", async () => {
+            const selectedGender = document.getElementById("gender-filter").value;
+            const users = await fetchUsers();
+
+            const filteredUsers = selectedGender
+            ? users.filter(user => user.gender === selectedGender)
+            : users;
+
+            buildUserRow(filteredUsers);
         });
     </script>
 </body>
