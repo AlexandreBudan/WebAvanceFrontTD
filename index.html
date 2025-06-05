@@ -28,7 +28,7 @@
                     <th>Nom</th>
                     <th>Email</th>
                     <th>Tel</th>
-                    <th>Age</th>
+                    <th>Age <button hidden id="sort-age-toggle" value="no">⇅</button></th>
                     <th>Genre</th>
                 </tr>
             </thead>
@@ -46,6 +46,7 @@
         // Add users instead of replacing them.
 
         const tbody = document.querySelector("#tbl-users tbody");
+        let users = [];
 
         const fetchUsers = async () => {
             try {
@@ -78,15 +79,15 @@
         }
 
         document.getElementById("fetch-users").addEventListener("click", async () => {
-            const users = await fetchUsers();
+            users = await fetchUsers();
             buildUserRow(users);
 
             document.getElementById("gender-filter").hidden = false;
+            document.getElementById("sort-age-toggle").hidden = false;
         });
 
         document.getElementById("gender-filter").addEventListener("change", async () => {
             const selectedGender = document.getElementById("gender-filter").value;
-            const users = await fetchUsers();
 
             const filteredUsers = selectedGender
             ? users.filter(user => user.gender === selectedGender)
@@ -94,6 +95,28 @@
 
             buildUserRow(filteredUsers);
         });
+
+        document.getElementById('sort-age-toggle').addEventListener('click', () => {
+            const asc = document.getElementById('sort-age-toggle').value;
+            let ageFilter = [...users];
+            switch (asc) {
+                case 'no':
+                    ageFilter.sort((a, b) => a.dob.age - b.dob.age);
+                    document.getElementById('sort-age-toggle').value = 'asc';
+                    break;
+                case 'asc':
+                    ageFilter.sort((a, b) => b.dob.age - a.dob.age);
+                    document.getElementById('sort-age-toggle').value = 'desc';
+                    break;
+                default:
+                    document.getElementById('sort-age-toggle').value = 'no';
+                    ageFilter = [...users];
+            }
+
+            document.getElementById('gender-filter').value = '';
+            buildUserRow(ageFilter);
+        });
+
     </script>
 </body>
 
