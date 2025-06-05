@@ -123,7 +123,7 @@
         }
 
         document.getElementById("fetch-users").addEventListener("click", async () => {
-            users = await fetchUsers();
+            users = [...users, ...await fetchUsers()];
             userFilters = {'age': 'no', 'gender': 'all', 'search': ''};
             buildUserRow(users);
 
