@@ -20,6 +20,7 @@
                 <option value="male">Male</option>
                 <option value="female">Female</option>
             </select>
+            <input hidden type="text" id="search-input" placeholder="Search users...">
         </div>
         <table id="tbl-users">
             <thead>
@@ -84,6 +85,7 @@
 
             document.getElementById("gender-filter").hidden = false;
             document.getElementById("sort-age-toggle").hidden = false;
+            document.getElementById("search-input").hidden = false;
         });
 
         document.getElementById("gender-filter").addEventListener("change", async () => {
@@ -115,6 +117,17 @@
 
             document.getElementById('gender-filter').value = '';
             buildUserRow(ageFilter);
+        });
+
+        document.getElementById('search-input').addEventListener('input', (event) => {
+            const searchTerm = event.target.value.toLowerCase();
+            const filteredUsers = users.filter(user =>
+                user.name.first.toLowerCase().includes(searchTerm) ||
+                user.name.last.toLowerCase().includes(searchTerm)
+            );
+
+            document.getElementById('gender-filter').value = '';
+            buildUserRow(filteredUsers);
         });
 
     </script>
