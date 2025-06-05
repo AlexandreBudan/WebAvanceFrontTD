@@ -16,12 +16,13 @@
             <hr />
             <button id="fetch-users">Fetch Users</button>
             <select hidden id="gender-filter">
-                <option value="">All</option>
+                <option value="all">All</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
             </select>
             <input hidden type="text" id="search-input" placeholder="Search users...">
         </div>
+        <p id="user-count">0 / 0 users</p>
         <table id="tbl-users">
             <thead>
                 <tr>
@@ -48,6 +49,7 @@
 
         const tbody = document.querySelector("#tbl-users tbody");
         let users = [];
+        let userFilters = {'age': 'no', 'gender': 'all', 'search': ''};
 
         const fetchUsers = async () => {
             try {
@@ -79,55 +81,76 @@
             }).join('');
         }
 
+        const filterUsers = () => {
+            let filteredUsers = [...users];
+
+            if (userFilters.gender !== 'all') {
+                filteredUsers = filteredUsers.filter(user => user.gender === userFilters.gender);
+            }
+
+            if (userFilters.age !== 'no') {
+                filteredUsers = filteredUsers.sort((a, b) => {
+                    if (userFilters.age === 'asc') {
+                        return a.dob.age - b.dob.age;
+                    } else if (userFilters.age === 'desc') {
+                        return b.dob.age - a.dob.age;
+                    }
+                    return 0;
+                });
+            }
+
+            if (userFilters.search) {
+                const normalize = str => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                const search = normalize(userFilters.search);
+                const searchParts = search.split(' ');
+
+                filteredUsers = filteredUsers.filter(user => {
+                    const first = normalize(user.name.first);
+                    const last = normalize(user.name.last);
+
+                    if (first.startsWith(search) || last.startsWith(search)) return true;
+
+                    if (searchParts.length === 2) {
+                        return first.startsWith(searchParts[0]) && last.startsWith(searchParts[1]);
+                    }
+                    return false;
+                });
+            }
+
+            document.getElementById("user-count").textContent = `${filteredUsers.length} / ${users.length} users`;
+
+            buildUserRow(filteredUsers);
+        }
+
         document.getElementById("fetch-users").addEventListener("click", async () => {
             users = await fetchUsers();
+            userFilters = {'age': 'no', 'gender': 'all', 'search': ''};
             buildUserRow(users);
 
             document.getElementById("gender-filter").hidden = false;
             document.getElementById("sort-age-toggle").hidden = false;
             document.getElementById("search-input").hidden = false;
+            document.getElementById("user-count").textContent = `${users.length} / ${users.length} users`;
         });
 
         document.getElementById("gender-filter").addEventListener("change", async () => {
-            const selectedGender = document.getElementById("gender-filter").value;
+            userFilters.gender = document.getElementById("gender-filter").value;
 
-            const filteredUsers = selectedGender
-            ? users.filter(user => user.gender === selectedGender)
-            : users;
-
-            buildUserRow(filteredUsers);
+            filterUsers();
         });
 
         document.getElementById('sort-age-toggle').addEventListener('click', () => {
-            const asc = document.getElementById('sort-age-toggle').value;
-            let ageFilter = [...users];
-            switch (asc) {
-                case 'no':
-                    ageFilter.sort((a, b) => a.dob.age - b.dob.age);
-                    document.getElementById('sort-age-toggle').value = 'asc';
-                    break;
-                case 'asc':
-                    ageFilter.sort((a, b) => b.dob.age - a.dob.age);
-                    document.getElementById('sort-age-toggle').value = 'desc';
-                    break;
-                default:
-                    document.getElementById('sort-age-toggle').value = 'no';
-                    ageFilter = [...users];
-            }
+            userFilters.age = userFilters.age === 'no' ? 'asc' : (userFilters.age === 'asc' ? 'desc' : 'no');
 
-            document.getElementById('gender-filter').value = '';
-            buildUserRow(ageFilter);
+            document.getElementById('sort-age-toggle').value = userFilters.age;
+            document.getElementById('sort-age-toggle').textContent = userFilters.age === 'no' ? '⇅' : (userFilters.age === 'asc' ? '↑' : '↓');
+
+            filterUsers();
         });
 
         document.getElementById('search-input').addEventListener('input', (event) => {
-            const searchTerm = event.target.value.toLowerCase();
-            const filteredUsers = users.filter(user =>
-                user.name.first.toLowerCase().includes(searchTerm) ||
-                user.name.last.toLowerCase().includes(searchTerm)
-            );
-
-            document.getElementById('gender-filter').value = '';
-            buildUserRow(filteredUsers);
+            userFilters.search = event.target.value.toLowerCase();
+            filterUsers();
         });
 
     </script>
