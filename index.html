@@ -23,7 +23,7 @@
                     <th>Nom</th>
                     <th>Email</th>
                     <th>Tel</th>
-                    <th>Age <button v-if="users.length" @click="sortUsers">{{userFilters.age === 'no' ? '⇅' : (userFilters.age === 'asc' ? '↑' : '↓')}}</button></th>
+                    <th>Age <button v-if="users.length" @click="sortUsers">{{userFilters.age === 'no' ? '↑' : (userFilters.age === 'asc' ? '⇅' : '↓')}}</button></th>
                     <th>Genre</th>
                 </tr>
             </thead>
