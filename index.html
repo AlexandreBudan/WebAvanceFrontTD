@@ -20,7 +20,10 @@
                 <option value="male">Male</option>
                 <option value="female">Female</option>
             </select>
-            <input hidden type="text" id="search-input" placeholder="Search users...">
+            <div hidden id="search-container">
+                <label for="search-input">Search:</label>
+                <input type="text" id="search-input" placeholder="Search users...">
+            </div>
         </div>
         <p id="user-count">0 / 0 users</p>
         <table id="tbl-users">
@@ -82,14 +85,14 @@
         }
 
         const filterUsers = () => {
-            let filteredUsers = [...users];
+            let filteredUsers = users;
 
             if (userFilters.gender !== 'all') {
                 filteredUsers = filteredUsers.filter(user => user.gender === userFilters.gender);
             }
 
             if (userFilters.age !== 'no') {
-                filteredUsers = filteredUsers.sort((a, b) => {
+                filteredUsers = filteredUsers.toSorted((a, b) => {
                     if (userFilters.age === 'asc') {
                         return a.dob.age - b.dob.age;
                     } else if (userFilters.age === 'desc') {
@@ -129,7 +132,7 @@
 
             document.getElementById("gender-filter").hidden = false;
             document.getElementById("sort-age-toggle").hidden = false;
-            document.getElementById("search-input").hidden = false;
+            document.getElementById("search-container").hidden = false;
             document.getElementById("user-count").textContent = `${users.length} / ${users.length} users`;
         });
 
